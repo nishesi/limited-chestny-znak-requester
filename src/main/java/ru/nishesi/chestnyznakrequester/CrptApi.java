@@ -1,7 +1,7 @@
 package ru.nishesi.chestnyznakrequester;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 
@@ -15,10 +15,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -33,6 +30,8 @@ public class CrptApi {
 
     public CrptApi(ObjectMapper objectMapper, HttpClient httpClient,
                    int requestLimit, TimeUnit timeUnit) {
+        if (requestLimit <= 0)
+            throw new IllegalArgumentException("requestLimit less then 1");
         this.objectMapper = objectMapper;
         this.requestLimit = requestLimit;
         this.httpClient = httpClient;
@@ -41,6 +40,8 @@ public class CrptApi {
     }
 
     public Response createDocument(Document document, String sign) throws CrptApiException {
+        Objects.requireNonNull(document);
+        Objects.requireNonNull(sign);
         try {
             synchronizeRequest();
             HttpResponse<byte[]> response = sendRequest(document, sign);
@@ -142,22 +143,30 @@ public class CrptApi {
         public record Product(
                 @JsonProperty("certificate_document")
                 String certificateDocument,
+
                 @JsonProperty("certificate_document_date")
                 @JsonFormat(pattern = "yyyy-MM-dd")
                 LocalDate certificateDocumentDate,
+
                 @JsonProperty("certificate_document_number")
                 String certificateDocumentNumber,
+
                 @JsonProperty("owner_inn")
                 String ownerInn,
+
                 @JsonProperty("producer_inn")
                 String producerInn,
+
                 @JsonProperty("production_date")
                 @JsonFormat(pattern = "yyyy-MM-dd")
                 LocalDate productionDate,
+
                 @JsonProperty("tnved_code")
                 String tnvedCode,
+
                 @JsonProperty("uit_code")
                 String uitCode,
+
                 @JsonProperty("uitu_code")
                 String uituCode
         ) {
